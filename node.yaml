@@ -8,7 +8,7 @@ node:
 market:
   # marketplace gRPC endpoint
   # required
-  endpoint: "8125721C2413d99a33E351e1F6Bb4e56b6b633FD@127.0.0.1:9095"
+  endpoint: "32e9935a016f64ea7c1cd251bea105fb5a36505a@172.16.1.228:9095"
 
 # Logging settings.
 log:
@@ -19,8 +19,7 @@ log:
 # locator settings
 locator:
   # Locator's gRPC endpoint for Eth to IP addr resolution
-  endpoint: "8125721C2413d99a33E351e1F6Bb4e56b6b633FD@127.0.0.1:9090"
-
+  endpoint: "0x32e9935a016f64ea7c1cd251bea105fb5a36505a@172.16.1.230:9090"
 
 # Settings for Ethereum keys
 ethereum:
@@ -29,8 +28,8 @@ ethereum:
   # passphrase for keystore
   pass_phrase: "any"
 
-# Hub management settings.
-# Set this if you have your own Hub and want to manage it.
-hub:
-  # endpoint is Hub's monitoring gRPC endpoint for client connections.
-  endpoint: "127.0.0.1:10001"
+## Hub management settings.
+## Set this if you have your own Hub and want to manage it.
+#hub:
+#  # endpoint is Hub's monitoring gRPC endpoint for client connections.
+#  endpoint: "127.0.0.1:10001"

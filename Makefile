@@ -19,6 +19,7 @@ HUB=sonmhub
 CLI=sonmcli
 LOCATOR=sonmlocator
 LOCAL_NODE=sonmnode
+MARKET_MAKER=sonmmaker
 
 TAGS=nocgo
 
@@ -59,6 +60,10 @@ build/cli:
 build/node:
 	@echo "+ $@"
 	${GO} build -tags "$(TAGS)" -ldflags "-s -X main.version=$(FULL_VER)" -o ${LOCAL_NODE} ${GOCMD}/node
+
+build/maker:
+	@echo "+ $@"
+	${GO} build -tags "$(TAGS)" -ldflags "-s -X main.version=$(FULL_VER)" -o ${MARKET_MAKER} ${GOCMD}/maker
 
 build/cli_win32:
 	@echo "+ $@"

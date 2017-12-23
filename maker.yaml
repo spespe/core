@@ -1,0 +1,13 @@
+num_orders: 5
+
+update_period: "5s"
+
+node_addr: "127.0.0.1:9999"
+
+deals_path: "./data"
+
+ethereum:
+  # path to keystore
+  key_store: "./keys"
+  # passphrase for keystore
+  pass_phrase: "any"

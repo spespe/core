@@ -2,7 +2,7 @@ duration: 1h
 
 resources:
   cpu_cores: 1
-  ram_bytes: 50mb
+  ram_bytes: 512Mb
   gpu_count: NO_GPU
   storage: 1Gb
 
@@ -10,7 +10,3 @@ resources:
     in: 100Mb
     out: 100Mb
     type: INCOMING
-
-  properties:
-    foo: 1101
-    cycles: 42
