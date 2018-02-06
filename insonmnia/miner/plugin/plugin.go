@@ -7,6 +7,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	log "github.com/noxiouz/zapctx/ctxlog"
+	"github.com/sonm-io/core/insonmnia/hardware"
 	"github.com/sonm-io/core/insonmnia/miner/gpu"
 	minet "github.com/sonm-io/core/insonmnia/miner/network"
 	"github.com/sonm-io/core/insonmnia/miner/volume"
@@ -30,7 +31,8 @@ type Provider interface {
 // GPUProvider describes an interface for applying GPU settings to the
 // container.
 type GPUProvider interface {
-	GPU() bool
+	IsGPURequired() bool
+	GpuDeviceIDs() []gpu.GPUID
 }
 
 // VolumeProvider describes an interface for applying volumes to the container.
@@ -124,7 +126,8 @@ func EmptyRepository() *Repository {
 func (r *Repository) Tune(provider Provider, hostCfg *container.HostConfig, netCfg *network.NetworkingConfig) (Cleanup, error) {
 	// Do not specify GPU type right now,
 	// just check that GPU is required
-	if provider.GPU() {
+
+	if provider.IsGPURequired() {
 		if err := r.TuneGPU(provider, hostCfg); err != nil {
 			return nil, err
 		}
@@ -150,12 +153,26 @@ func (r *Repository) HasGPU() bool {
 	return len(r.gpuTuners) > 0
 }
 
+func (r *Repository) collectGPUDevices() []*sonm.GPUDevice {
+	var devs []*sonm.GPUDevice
+	for _, tun := range r.gpuTuners {
+		devs = append(devs, tun.Devices()...)
+	}
+
+	return devs
+}
+
+// ApplyHardwareInfo exposing info about hardware units controlled by
+// various plugins.
+func (r *Repository) ApplyHardwareInfo(hw *hardware.Hardware) {
+	hw.GPU = r.collectGPUDevices()
+}
+
 // TuneGPU creates GPU bound required for the given provider with further
 // host config tuning.
 func (r *Repository) TuneGPU(provider GPUProvider, cfg *container.HostConfig) error {
-
 	for _, tuner := range r.gpuTuners {
-		err := tuner.Tune(cfg)
+		err := tuner.Tune(cfg, provider.GpuDeviceIDs())
 		if err != nil {
 			return err
 		}

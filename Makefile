@@ -20,6 +20,7 @@ CLI=sonmcli
 LOCATOR=sonmlocator
 LOCAL_NODE=sonmnode
 AUTOCLI=autocli
+LSGPU=lsgpu
 
 TAGS=nocgo
 
@@ -67,6 +68,10 @@ build/cli:
 build/node:
 	@echo "+ $@"
 	${GO} build -tags "$(TAGS)" -ldflags "-s $(LDFLAGS)" -o ${LOCAL_NODE} ${GOCMD}/node
+
+build/lsgpu:
+	@echo "+ $@"
+	${GO} build -tags "$(TAGS)" -ldflags "-s $(LDFLAGS)" -o ${LSGPU} ${GOCMD}/lsgpu
 
 build/cli_win32:
 	@echo "+ $@"
