@@ -13,25 +13,24 @@ import (
 )
 
 type config struct {
-	LNSAddr         string `required:"true" yaml:"lns_addr"`
-	Subnet          string `required:"true" yaml:"subnet"`
-	PPPUsername     string `required:"true" yaml:"ppp_username"`
-	PPPPassword     string `required:"true" yaml:"ppp_password"`
-	PPPMTU          string `required:"true" yaml:"ppp_mtu" default:"1410"`
-	PPPMRU          string `required:"true" yaml:"ppp_mru" default:"1410"`
-	PPPIdle         string `required:"true" yaml:"ppp_idle" default:"1800"`
-	PPPConnectDelay string `required:"true" yaml:"ppp_connect_delay" default:"5000"`
-
-	PPPDebug            bool `required:"true" yaml:"ppp_debug" default:"true"`
-	PPPNoauth           bool `required:"true" yaml:"ppp_noauth" default:"true"`
-	PPPNoccp            bool `required:"true" yaml:"ppp_noccp" default:"true"`
-	PPPDefaultRoute     bool `required:"true" yaml:"ppp_default_route" default:"true"`
-	PPPUsepeerdns       bool `required:"true" yaml:"ppp_use_peer_dns" default:"true"`
-	PPPLock             bool `required:"true" yaml:"ppp_lock" default:"true"`
-	PPPIPCPAcceptLocal  bool `required:"true" yaml:"ppp_ipcp_accept_local" default:"true"`
-	PPPIPCPAcceptRemote bool `required:"true" yaml:"ppp_ipcp_accept_remote" default:"true"`
-	PPPRefuseEAP        bool `required:"true" yaml:"ppp_refuse_eap" default:"true"`
-	PPPRequireMSChapV2  bool `required:"true" yaml:"ppp_require_mschap_v2" default:"true"`
+	LNSAddr             string `required:"true" yaml:"lns_addr"`
+	Subnet              string `required:"true" yaml:"subnet"`
+	PPPUsername         string `required:"false" yaml:"ppp_username"`
+	PPPPassword         string `required:"false" yaml:"ppp_password"`
+	PPPMTU              string `required:"false" yaml:"ppp_mtu" default:"1410"`
+	PPPMRU              string `required:"false" yaml:"ppp_mru" default:"1410"`
+	PPPIdle             string `required:"false" yaml:"ppp_idle" default:"1800"`
+	PPPConnectDelay     string `required:"false" yaml:"ppp_connect_delay" default:"5000"`
+	PPPDebug            bool   `required:"false" yaml:"ppp_debug" default:"true"`
+	PPPNoauth           bool   `required:"false" yaml:"ppp_noauth" default:"true"`
+	PPPNoccp            bool   `required:"false" yaml:"ppp_noccp" default:"true"`
+	PPPDefaultRoute     bool   `required:"false" yaml:"ppp_default_route" default:"true"`
+	PPPUsepeerdns       bool   `required:"false" yaml:"ppp_use_peer_dns" default:"true"`
+	PPPLock             bool   `required:"false" yaml:"ppp_lock" default:"true"`
+	PPPIPCPAcceptLocal  bool   `required:"false" yaml:"ppp_ipcp_accept_local" default:"true"`
+	PPPIPCPAcceptRemote bool   `required:"false" yaml:"ppp_ipcp_accept_remote" default:"true"`
+	PPPRefuseEAP        bool   `required:"false" yaml:"ppp_refuse_eap" default:"true"`
+	PPPRequireMSChapV2  bool   `required:"false" yaml:"ppp_require_mschap_v2" default:"true"`
 }
 
 func (o *config) GetHash() string {
@@ -47,14 +46,6 @@ func (o *config) validate() error {
 
 	if _, _, err := net.ParseCIDR(o.Subnet); err != nil {
 		return errors.Wrapf(err, "failed to parse Subnet `%s` to CIDR", o.Subnet)
-	}
-
-	if len(o.PPPUsername) < 1 {
-		return errors.New("empty PPP username")
-	}
-
-	if len(o.PPPPassword) < 1 {
-		return errors.New("empty PPP password")
 	}
 
 	return nil
