@@ -1593,6 +1593,24 @@
 			"revisionTime": "2016-08-01T03:09:57Z"
 		},
 		{
+			"checksumSHA1": "v78jfRq2M/MDXChpGsHaV76o/2M=",
+			"path": "github.com/vishvananda/netlink",
+			"revision": "5236321576c0c97ab02c078e60f9b1c5c1828807",
+			"revisionTime": "2018-02-23T16:59:06Z"
+		},
+		{
+			"checksumSHA1": "WQzkzzCn8pwstWgO4o41T0czyT4=",
+			"path": "github.com/vishvananda/netlink/nl",
+			"revision": "5236321576c0c97ab02c078e60f9b1c5c1828807",
+			"revisionTime": "2018-02-23T16:59:06Z"
+		},
+		{
+			"checksumSHA1": "qf37dJzNS2iXycH62ukEw+cleZY=",
+			"path": "github.com/vishvananda/netns",
+			"revision": "be1fbeda19366dea804f00efff2dd73a1642fdcc",
+			"revisionTime": "2017-11-10T22:28:10Z"
+		},
+		{
 			"checksumSHA1": "3IdEHJfBkeEE8guKA2tcA8Fv6eg=",
 			"path": "go.uber.org/atomic",
 			"revision": "70bd1261d36be490ebd22a62b385a3c5d23b6240",
