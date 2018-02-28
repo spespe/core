@@ -54,6 +54,11 @@ func (d *IPAMDriver) RequestPool(request *ipam.RequestPoolRequest) (*ipam.Reques
 func (d *IPAMDriver) RequestAddress(request *ipam.RequestAddressRequest) (*ipam.RequestAddressResponse, error) {
 	log.G(d.ctx).Info("received RequestAddress request", zap.Any("request", request))
 
+	if len(request.Address) > 0 {
+		log.G(d.ctx).Error("requests for specific addresses are not supported")
+		return nil, errors.New("requests for specific addresses are not supported")
+	}
+
 	netInfo, err := d.store.GetNetwork(request.PoolID)
 	if err != nil {
 		log.G(d.ctx).Error("failed to get network", zap.String("pool_id", request.PoolID), zap.Error(err))
