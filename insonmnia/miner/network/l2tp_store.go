@@ -99,11 +99,11 @@ type L2TPNetwork struct {
 	ID          string
 	PoolID      string
 	count       int
-	networkOpts *L2TPConfig
+	networkOpts *L2TPNetworkConfig
 	store       *L2TPEndpointStore
 }
 
-func newNetworkInfo(opts *L2TPConfig) *L2TPNetwork {
+func newNetworkInfo(opts *L2TPNetworkConfig) *L2TPNetwork {
 	return &L2TPNetwork{
 		networkOpts: opts,
 		store:       NewL2TPEndpointStore(),
@@ -216,7 +216,7 @@ type L2TPEndpoint struct {
 	PPPDevName   string
 	AssignedCIDR string
 	AssignedIP   string
-	networkOpts  *L2TPConfig
+	networkOpts  *L2TPNetworkConfig
 }
 
 func NewL2TPEndpoint(netInfo *L2TPNetwork) *L2TPEndpoint {
