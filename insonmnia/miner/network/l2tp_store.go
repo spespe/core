@@ -7,20 +7,20 @@ import (
 	"github.com/pkg/errors"
 )
 
-type networkInfoStore struct {
+type L2TPNetworkStore struct {
 	mu       sync.Mutex
 	aliases  map[string]string
-	networks map[string]*networkInfo
+	networks map[string]*L2TPNetwork
 }
 
-func NewNetworkInterface() *networkInfoStore {
-	return &networkInfoStore{
+func NewL2TPNetworkStore() *L2TPNetworkStore {
+	return &L2TPNetworkStore{
 		aliases:  make(map[string]string),
-		networks: make(map[string]*networkInfo),
+		networks: make(map[string]*L2TPNetwork),
 	}
 }
 
-func (s *networkInfoStore) AddNetwork(netID string, netInfo *networkInfo) error {
+func (s *L2TPNetworkStore) AddNetwork(netID string, netInfo *L2TPNetwork) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -34,7 +34,7 @@ func (s *networkInfoStore) AddNetwork(netID string, netInfo *networkInfo) error 
 	return nil
 }
 
-func (s *networkInfoStore) AddNetworkAlias(netID, alias string) error {
+func (s *L2TPNetworkStore) AddNetworkAlias(netID, alias string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -47,7 +47,7 @@ func (s *networkInfoStore) AddNetworkAlias(netID, alias string) error {
 	return nil
 }
 
-func (s *networkInfoStore) RemoveNetwork(netID string) error {
+func (s *L2TPNetworkStore) RemoveNetwork(netID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -67,7 +67,7 @@ func (s *networkInfoStore) RemoveNetwork(netID string) error {
 	return nil
 }
 
-func (s *networkInfoStore) GetNetwork(netID string) (*networkInfo, error) {
+func (s *L2TPNetworkStore) GetNetwork(netID string) (*L2TPNetwork, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -83,11 +83,11 @@ func (s *networkInfoStore) GetNetwork(netID string) (*networkInfo, error) {
 	return nil, errors.Errorf("network not found: %s", netID)
 }
 
-func (s *networkInfoStore) GetNetworks() []*networkInfo {
+func (s *L2TPNetworkStore) GetNetworks() []*L2TPNetwork {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	var out []*networkInfo
+	var out []*L2TPNetwork
 	for _, netInfo := range s.networks {
 		out = append(out, netInfo)
 	}
@@ -95,45 +95,45 @@ func (s *networkInfoStore) GetNetworks() []*networkInfo {
 	return out
 }
 
-type networkInfo struct {
+type L2TPNetwork struct {
 	ID          string
 	PoolID      string
 	count       int
-	networkOpts *config
-	store       *endpointInfoStore
+	networkOpts *L2TPConfig
+	store       *L2TPEndpointStore
 }
 
-func newNetworkInfo(opts *config) *networkInfo {
-	return &networkInfo{
+func newNetworkInfo(opts *L2TPConfig) *L2TPNetwork {
+	return &L2TPNetwork{
 		networkOpts: opts,
-		store:       newEndpointStore(),
+		store:       NewL2TPEndpointStore(),
 	}
 }
 
-func (i *networkInfo) Setup() error {
-	i.PoolID = i.networkOpts.GetHash()
+func (n *L2TPNetwork) Setup() error {
+	n.PoolID = n.networkOpts.GetHash()
 
 	return nil
 }
 
-func (i *networkInfo) ConnInc() {
-	i.count++
+func (n *L2TPNetwork) ConnInc() {
+	n.count++
 }
 
-type endpointInfoStore struct {
+type L2TPEndpointStore struct {
 	mu        sync.Mutex
 	aliases   map[string]string
-	endpoints map[string]*endpointInfo
+	endpoints map[string]*L2TPEndpoint
 }
 
-func newEndpointStore() *endpointInfoStore {
-	return &endpointInfoStore{
+func NewL2TPEndpointStore() *L2TPEndpointStore {
+	return &L2TPEndpointStore{
 		aliases:   make(map[string]string),
-		endpoints: make(map[string]*endpointInfo),
+		endpoints: make(map[string]*L2TPEndpoint),
 	}
 }
 
-func (s *endpointInfoStore) AddEndpoint(endpointID string, eptInfo *endpointInfo) error {
+func (s *L2TPEndpointStore) AddEndpoint(endpointID string, eptInfo *L2TPEndpoint) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -147,7 +147,7 @@ func (s *endpointInfoStore) AddEndpoint(endpointID string, eptInfo *endpointInfo
 	return nil
 }
 
-func (s *endpointInfoStore) AddEndpointAlias(endpointID, alias string) error {
+func (s *L2TPEndpointStore) AddEndpointAlias(endpointID, alias string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -160,7 +160,7 @@ func (s *endpointInfoStore) AddEndpointAlias(endpointID, alias string) error {
 	return nil
 }
 
-func (s *endpointInfoStore) RemoveEndpoint(endpointID string) error {
+func (s *L2TPEndpointStore) RemoveEndpoint(endpointID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -180,7 +180,7 @@ func (s *endpointInfoStore) RemoveEndpoint(endpointID string) error {
 	return nil
 }
 
-func (s *endpointInfoStore) GetEndpoint(netID string) (*endpointInfo, error) {
+func (s *L2TPEndpointStore) GetEndpoint(netID string) (*L2TPEndpoint, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -196,11 +196,11 @@ func (s *endpointInfoStore) GetEndpoint(netID string) (*endpointInfo, error) {
 	return nil, errors.Errorf("endpoint not found: %s", netID)
 }
 
-func (s *endpointInfoStore) GetEndpoints() []*endpointInfo {
+func (s *L2TPEndpointStore) GetEndpoints() []*L2TPEndpoint {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	var out []*endpointInfo
+	var out []*L2TPEndpoint
 	for _, eptInfo := range s.endpoints {
 		out = append(out, eptInfo)
 	}
@@ -208,7 +208,7 @@ func (s *endpointInfoStore) GetEndpoints() []*endpointInfo {
 	return out
 }
 
-type endpointInfo struct {
+type L2TPEndpoint struct {
 	ID           string
 	Name         string
 	ConnName     string
@@ -216,74 +216,74 @@ type endpointInfo struct {
 	PPPDevName   string
 	AssignedCIDR string
 	AssignedIP   string
-	networkOpts  *config
+	networkOpts  *L2TPConfig
 }
 
-func newEndpointInfo(netInfo *networkInfo) *endpointInfo {
-	return &endpointInfo{
+func NewL2TPEndpoint(netInfo *L2TPNetwork) *L2TPEndpoint {
+	return &L2TPEndpoint{
 		Name:        fmt.Sprintf("%d_%s", netInfo.count, netInfo.PoolID),
 		networkOpts: netInfo.networkOpts,
 	}
 }
 
-func (i *endpointInfo) setup() error {
-	i.ConnName = i.Name + "-connection"
-	i.PPPDevName = ("ppp" + i.Name)[:15]
-	i.PPPOptFile = pppOptsDir + i.Name + "." + ".client"
+func (e *L2TPEndpoint) setup() error {
+	e.ConnName = e.Name + "-connection"
+	e.PPPDevName = ("ppp" + e.Name)[:15]
+	e.PPPOptFile = pppOptsDir + e.Name + "." + ".client"
 
 	return nil
 }
 
-func (i *endpointInfo) GetPppConfig() string {
+func (e *L2TPEndpoint) GetPppConfig() string {
 	cfg := ""
 
-	if i.networkOpts.PPPIPCPAcceptLocal {
+	if e.networkOpts.PPPIPCPAcceptLocal {
 		cfg += "\nipcp-accept-local"
 	}
-	if i.networkOpts.PPPIPCPAcceptRemote {
+	if e.networkOpts.PPPIPCPAcceptRemote {
 		cfg += "\nipcp-accept-remote"
 	}
-	if i.networkOpts.PPPRefuseEAP {
+	if e.networkOpts.PPPRefuseEAP {
 		cfg += "\nrefuse-eap"
 	}
-	if i.networkOpts.PPPRequireMSChapV2 {
+	if e.networkOpts.PPPRequireMSChapV2 {
 		cfg += "\nrequire-mschap-v2"
 	}
-	if i.networkOpts.PPPNoccp {
+	if e.networkOpts.PPPNoccp {
 		cfg += "\nnoccp"
 	}
-	if i.networkOpts.PPPNoauth {
+	if e.networkOpts.PPPNoauth {
 		cfg += "\nnoauth"
 	}
 
-	cfg += fmt.Sprintf("\nifname %s", i.PPPDevName)
-	cfg += fmt.Sprintf("\nname %s", i.networkOpts.PPPUsername)
-	cfg += fmt.Sprintf("\npassword %s", i.networkOpts.PPPPassword)
-	cfg += fmt.Sprintf("\nmtu %s", i.networkOpts.PPPMTU)
-	cfg += fmt.Sprintf("\nmru %s", i.networkOpts.PPPMRU)
-	cfg += fmt.Sprintf("\nidle %s", i.networkOpts.PPPIdle)
-	cfg += fmt.Sprintf("\nconnect-delay %s", i.networkOpts.PPPConnectDelay)
+	cfg += fmt.Sprintf("\nifname %s", e.PPPDevName)
+	cfg += fmt.Sprintf("\nname %s", e.networkOpts.PPPUsername)
+	cfg += fmt.Sprintf("\npassword %s", e.networkOpts.PPPPassword)
+	cfg += fmt.Sprintf("\nmtu %s", e.networkOpts.PPPMTU)
+	cfg += fmt.Sprintf("\nmru %s", e.networkOpts.PPPMRU)
+	cfg += fmt.Sprintf("\nidle %s", e.networkOpts.PPPIdle)
+	cfg += fmt.Sprintf("\nconnect-delay %s", e.networkOpts.PPPConnectDelay)
 
-	if i.networkOpts.PPPDebug {
+	if e.networkOpts.PPPDebug {
 		cfg += "\ndebug"
 	}
 
-	if i.networkOpts.PPPDefaultRoute {
+	if e.networkOpts.PPPDefaultRoute {
 		cfg += "\ndefaultroute"
 	}
-	if i.networkOpts.PPPUsepeerdns {
+	if e.networkOpts.PPPUsepeerdns {
 		cfg += "\nusepeerdns"
 	}
-	if i.networkOpts.PPPLock {
+	if e.networkOpts.PPPLock {
 		cfg += "\nlock"
 	}
 
 	return cfg
 }
 
-func (i *endpointInfo) GetXl2tpConfig() []string {
+func (e *L2TPEndpoint) GetXl2tpConfig() []string {
 	return []string{
-		fmt.Sprintf("lns=%s", i.networkOpts.LNSAddr),
-		fmt.Sprintf("pppoptfile=%s", i.PPPOptFile),
+		fmt.Sprintf("lns=%s", e.networkOpts.LNSAddr),
+		fmt.Sprintf("pppoptfile=%s", e.PPPOptFile),
 	}
 }

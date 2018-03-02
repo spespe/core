@@ -14,7 +14,7 @@ import (
 
 func main() {
 	var (
-		store = sonmnet.NewNetworkInterface()
+		store = sonmnet.NewL2TPNetworkStore()
 		netD  = sonmnet.NewL2TPDriver(context.Background(), store)
 		ipamD = sonmnet.NewIPAMDriver(context.Background(), store)
 	)
@@ -28,7 +28,7 @@ func main() {
 
 func startL2tp(d *sonmnet.L2TPDriver) {
 	var (
-		socketPath = "/run/docker/plugins/l2tp.sock"
+		socketPath = "/run/docker/plugins/l2tp_network.sock"
 	)
 
 	syscall.Unlink(socketPath)
@@ -48,7 +48,7 @@ func startL2tp(d *sonmnet.L2TPDriver) {
 
 func startIPAM(d *sonmnet.IPAMDriver) {
 	var (
-		socketPath = "/run/docker/plugins/ipam.sock"
+		socketPath = "/run/docker/plugins/l2tp_ipam.sock"
 	)
 
 	syscall.Unlink(socketPath)

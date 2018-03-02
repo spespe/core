@@ -19,10 +19,10 @@ import (
 type IPAMDriver struct {
 	ctx     context.Context
 	counter int
-	store   *networkInfoStore
+	store   *L2TPNetworkStore
 }
 
-func NewIPAMDriver(ctx context.Context, store *networkInfoStore) *IPAMDriver {
+func NewIPAMDriver(ctx context.Context, store *L2TPNetworkStore) *IPAMDriver {
 	return &IPAMDriver{
 		ctx:   ctx,
 		store: store,
@@ -66,7 +66,7 @@ func (d *IPAMDriver) RequestAddress(request *ipam.RequestAddressRequest) (*ipam.
 		return nil, errors.Wrap(err, "failed to get network")
 	}
 
-	eptInfo := newEndpointInfo(netInfo)
+	eptInfo := NewL2TPEndpoint(netInfo)
 	if err := eptInfo.setup(); err != nil {
 		log.G(d.ctx).Error("failed to setup endpoint", zap.String("pool_id", netInfo.PoolID),
 			zap.String("network_id", netInfo.ID), zap.Error(err))
@@ -215,7 +215,7 @@ func (d *IPAMDriver) getAssignedCIDR(devName string) (string, error) {
 	return "", errors.Errorf("device %s not found", devName)
 }
 
-func (d *IPAMDriver) removeEndpoint(netInfo *networkInfo, eptInfo *endpointInfo) error {
+func (d *IPAMDriver) removeEndpoint(netInfo *L2TPNetwork, eptInfo *L2TPEndpoint) error {
 	disconnectCmd := exec.Command("xl2tpd-control", "disconnect", eptInfo.ConnName)
 	if err := disconnectCmd.Run(); err != nil {
 		return errors.Wrapf(err, "xl2rpd failed to close connection %s", eptInfo.ConnName)

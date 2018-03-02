@@ -15,10 +15,10 @@ const (
 
 type L2TPDriver struct {
 	ctx   context.Context
-	store *networkInfoStore
+	store *L2TPNetworkStore
 }
 
-func NewL2TPDriver(ctx context.Context, store *networkInfoStore) *L2TPDriver {
+func NewL2TPDriver(ctx context.Context, store *L2TPNetworkStore) *L2TPDriver {
 	return &L2TPDriver{
 		ctx:   ctx,
 		store: store,
