@@ -67,6 +67,8 @@ plugins:
   network:
     tinc:
       enabled: true
+    l2tp:
+      enabled: true
 #  gpus:
 #    nvidia: {}
 #    radeon: {}

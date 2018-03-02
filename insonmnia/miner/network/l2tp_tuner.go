@@ -3,7 +3,12 @@ package network
 import (
 	"context"
 	"net"
+	"os"
 	"syscall"
+
+	"fmt"
+
+	"io/ioutil"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -24,6 +29,11 @@ type L2TPTuner struct {
 }
 
 func NewL2TPTuner(ctx context.Context, cfg *L2TPConfig) (*L2TPTuner, error) {
+	err := os.MkdirAll(cfg.ConfigDir, 0770)
+	if err != nil {
+		return nil, err
+	}
+
 	cli, err := client.NewEnvClient()
 	if err != nil {
 		return nil, err
@@ -93,10 +103,16 @@ func (t *L2TPTuner) Run(ctx context.Context) error {
 
 func (t *L2TPTuner) Tune(net structs.Network, hostConfig *container.HostConfig, config *network.NetworkingConfig) (Cleanup, error) {
 	opts := cloneOptions(net.NetworkOptions())
+	configPath, err := t.writeConfig(net.ID(), opts)
+	if err != nil {
+		return nil, err
+	}
+
+	driverOpts := map[string]string{"config": configPath}
 	createOpts := types.NetworkCreate{
 		Driver:  "l2tp_net",
-		Options: opts,
-		IPAM:    &network.IPAM{Driver: "l2tp_ipam", Options: opts},
+		Options: driverOpts,
+		IPAM:    &network.IPAM{Driver: "l2tp_ipam", Options: driverOpts},
 	}
 
 	response, err := t.cli.NetworkCreate(context.Background(), net.ID(), createOpts)
@@ -107,25 +123,40 @@ func (t *L2TPTuner) Tune(net structs.Network, hostConfig *container.HostConfig, 
 	if config.EndpointsConfig == nil {
 		config.EndpointsConfig = make(map[string]*network.EndpointSettings)
 		config.EndpointsConfig[response.ID] = &network.EndpointSettings{
-			IPAMConfig: &network.EndpointIPAMConfig{
-				IPv4Address: net.NetworkAddr(),
-			},
-			IPAddress: net.NetworkAddr(),
-			NetworkID: response.ID,
+			IPAMConfig: &network.EndpointIPAMConfig{IPv4Address: net.NetworkAddr()},
+			IPAddress:  net.NetworkAddr(),
+			NetworkID:  response.ID,
 		}
 	}
 
 	return &L2TPCleaner{
-		cli:       t.cli,
-		networkID: response.ID,
+		cli:        t.cli,
+		networkID:  response.ID,
+		configPath: configPath,
 	}, nil
 }
 
+func (t *L2TPTuner) writeConfig(netID string, opts map[string]string) (string, error) {
+	var data string
+	for k, v := range opts {
+		data += fmt.Sprintf("%s: %s\n", k, v)
+	}
+
+	path := t.cfg.ConfigDir + "/" + netID
+
+	return path, ioutil.WriteFile(path, []byte(data), 700)
+}
+
 type L2TPCleaner struct {
-	networkID string
-	cli       *client.Client
+	cli        *client.Client
+	networkID  string
+	configPath string
 }
 
 func (t *L2TPCleaner) Close() error {
-	return t.cli.NetworkRemove(context.Background(), t.networkID)
+	if err := t.cli.NetworkRemove(context.Background(), t.networkID); err != nil {
+		return err
+	}
+
+	return os.Remove(t.configPath)
 }

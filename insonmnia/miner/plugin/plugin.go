@@ -18,6 +18,7 @@ import (
 const (
 	bridgeNetwork = "bridge"
 	tincNetwork   = "tinc"
+	l2tpNetwork   = "l2tp"
 )
 
 // Provider unifies all possible providers for tuning.
@@ -105,6 +106,14 @@ func NewRepository(ctx context.Context, cfg Config) (*Repository, error) {
 			return nil, fmt.Errorf("failed to initialize tinc tuner - %v", err)
 		}
 		r.networkTuners[tincNetwork] = tincTuner
+	}
+
+	if cfg.L2TP != nil {
+		l2tpTuner, err := minet.NewL2TPTuner(ctx, cfg.L2TP)
+		if err != nil {
+			return nil, fmt.Errorf("failed to initialize l2tp tuner - %v", err)
+		}
+		r.networkTuners[l2tpNetwork] = l2tpTuner
 	}
 
 	return r, nil

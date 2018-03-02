@@ -13,6 +13,13 @@ import (
 )
 
 type L2TPConfig struct {
+	Enabled           bool   `yaml:"enabled"`
+	NetworkSocketPath string `required:"false" yaml:"ipam_socket_path" default:"/run/docker/plugins/l2tp_net.sock"`
+	IPAMSocketPath    string `required:"false" yaml:"ipam_socket_path" default:"/run/docker/plugins/l2tp_ipam.sock"`
+	ConfigDir         string `required:"false" yaml:"config_dir" default:"/tmp/sonm/l2tp/"`
+}
+
+type L2TPNetworkConfig struct {
 	LNSAddr             string `required:"true" yaml:"lns_addr"`
 	Subnet              string `required:"true" yaml:"subnet"`
 	PPPUsername         string `required:"false" yaml:"ppp_username"`
@@ -31,17 +38,15 @@ type L2TPConfig struct {
 	PPPIPCPAcceptRemote bool   `required:"false" yaml:"ppp_ipcp_accept_remote" default:"true"`
 	PPPRefuseEAP        bool   `required:"false" yaml:"ppp_refuse_eap" default:"true"`
 	PPPRequireMSChapV2  bool   `required:"false" yaml:"ppp_require_mschap_v2" default:"true"`
-	NetworkSocketPath   string `required:"false" yaml:"ipam_socket_path" default:"/run/docker/plugins/l2tp_net.sock"`
-	IPAMSocketPath      string `required:"false" yaml:"ipam_socket_path" default:"/run/docker/plugins/l2tp_ipam.sock"`
 }
 
-func (o *L2TPConfig) GetHash() string {
+func (o *L2TPNetworkConfig) GetHash() string {
 	hasher := md5.New()
 	hasher.Write([]byte(o.LNSAddr + o.PPPUsername + o.PPPPassword))
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func (o *L2TPConfig) validate() error {
+func (o *L2TPNetworkConfig) validate() error {
 	if ip := net.ParseIP(o.LNSAddr); ip == nil {
 		return errors.Errorf("failed to parse lns_addr `%s` to IP", o.LNSAddr)
 	}
@@ -53,13 +58,13 @@ func (o *L2TPConfig) validate() error {
 	return nil
 }
 
-func parseOptsIPAM(request *ipam.RequestPoolRequest) (*L2TPConfig, error) {
+func parseOptsIPAM(request *ipam.RequestPoolRequest) (*L2TPNetworkConfig, error) {
 	path, ok := request.Options["config"]
 	if !ok {
 		return nil, errors.New("config path not provided")
 	}
 
-	cfg := &L2TPConfig{}
+	cfg := &L2TPNetworkConfig{}
 	if err := configor.Load(cfg, path); err != nil {
 		return nil, err
 	}
@@ -71,8 +76,7 @@ func parseOptsIPAM(request *ipam.RequestPoolRequest) (*L2TPConfig, error) {
 	return cfg, nil
 }
 
-func parseOptsNetwork(request *network.CreateNetworkRequest) (*L2TPConfig, error) {
-
+func parseOptsNetwork(request *network.CreateNetworkRequest) (*L2TPNetworkConfig, error) {
 	rawOpts, ok := request.Options["com.docker.network.generic"]
 	if !ok {
 		return nil, errors.New("no options provided")
@@ -88,7 +92,7 @@ func parseOptsNetwork(request *network.CreateNetworkRequest) (*L2TPConfig, error
 		return nil, errors.New("config path not provided")
 	}
 
-	cfg := &L2TPConfig{}
+	cfg := &L2TPNetworkConfig{}
 	if err := configor.Load(cfg, path.(string)); err != nil {
 		return nil, err
 	}
